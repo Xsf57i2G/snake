@@ -1,5 +1,5 @@
 /*
- * snake.go - The game of Snake.
+ * The game of Snake.
  */
 
 package main
