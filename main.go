@@ -90,7 +90,9 @@ func (g *game) update() {
 
 		// Create a new point for the apple
 		// at a random position.
-		g.apple = point{rand.Intn(g.width), rand.Intn(g.height)}
+		h := rand.Intn(g.height)
+		w := rand.Intn(g.width)
+		g.apple = point{w, h}
 	}
 
 	// Check if snake overlaps with itself.
