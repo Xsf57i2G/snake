@@ -20,11 +20,11 @@ type snake struct {
 }
 
 type game struct {
-	apple         point
-	height, width int
-	over          bool
-	score         int
-	snake         snake
+	apple point
+	h, w  int
+	over  bool
+	score int
+	snake snake
 }
 
 func (p *point) same(point point) bool {
@@ -90,8 +90,8 @@ func (g *game) update() {
 
 		// Create a new point for the apple
 		// at a random position.
-		h := rand.Intn(g.height)
-		w := rand.Intn(g.width)
+		h := rand.Intn(g.h)
+		w := rand.Intn(g.w)
 		g.apple = point{w, h}
 	}
 
@@ -104,8 +104,8 @@ func (g *game) update() {
 
 	// Wrap snake around screen.
 	head := &g.snake.body[0]
-	head.x = (head.x + g.width) % g.width
-	head.y = (head.y + g.height) % g.height
+	head.x = (head.x + g.w) % g.w
+	head.y = (head.y + g.h) % g.h
 }
 
 func (g *game) draw() {
@@ -115,8 +115,8 @@ func (g *game) draw() {
 	// Print the score.
 	fmt.Printf("Score: %d\n", g.score)
 
-	h := g.height
-	w := g.width
+	h := g.h
+	w := g.w
 	buf := make([]byte, 0, h*(w))
 
 	for y := 0; y < h; y++ {
@@ -151,13 +151,15 @@ func (g *game) draw() {
 }
 
 func main() {
+	h := 10
+	w := 20
 	g := game{
-		height: 10,
-		width:  20,
+		h: h,
+		w: w,
 		// Initialize snake at (0, 0).
 		snake: snake{
 			body: []point{
-				{rand.Intn(20), rand.Intn(10)},
+				{rand.Intn(w), rand.Intn(h)},
 			},
 		},
 		// Initialize apple at a random position.
