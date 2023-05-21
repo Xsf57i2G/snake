@@ -1,3 +1,7 @@
+/*
+ * snake.go - The game of Snake.
+ */
+
 package main
 
 import (
