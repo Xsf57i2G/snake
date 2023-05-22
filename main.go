@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 
@@ -58,7 +59,10 @@ func (s *snake) move(x, y int) {
 }
 
 func (g *game) input() {
-	tty, _ := tty.Open()
+	tty, err := tty.Open()
+	if err != nil {
+		panic(err)
+	}
 	defer tty.Close()
 
 	ch, err := tty.ReadRune()
@@ -115,22 +119,20 @@ func (g *game) draw() {
 	// Print the score.
 	fmt.Printf("Score: %d\n", g.score)
 
-	h := g.h
-	w := g.w
-	buf := make([]byte, 0, h*(w))
+	buf := bytes.Buffer{}
 
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
+	for y := 0; y < g.h; y++ {
+		for x := 0; x < g.w; x++ {
 			switch {
 			case g.snake.body[0].same(point{x, y}):
-				buf = append(buf, '@')
+				buf.WriteByte('@')
 			case g.apple.same(point{x, y}):
-				buf = append(buf, '$')
+				buf.WriteByte('*')
 			default:
-				buf = append(buf, '.')
+				buf.WriteByte('.')
 			}
 		}
-		buf = append(buf, '\n')
+		buf.WriteByte('\n')
 	}
 
 	// For every point on the snake's body,
@@ -140,31 +142,22 @@ func (g *game) draw() {
 	// y coordinate by the width of the
 	// screen and adding the x coordinate.
 	for _, p := range g.snake.body[1:] {
-		i := p.y*(w+1) + p.x
-		buf[i] = 'o'
+		i := p.y*(g.w+1) + p.x
+		buf.Bytes()[i] = 'o'
 	}
 
-	fmt.Print(string(buf))
+	fmt.Print(buf.String())
 
 	// Print game controls.
 	fmt.Println("wasd or hjkl to move, q to quit")
 }
 
 func main() {
-	h := 10
-	w := 20
-	g := game{
-		h: h,
-		w: w,
-		// Initialize snake at (0, 0).
-		snake: snake{
-			body: []point{
-				{rand.Intn(w), rand.Intn(h)},
-			},
-		},
-		// Initialize apple at a random position.
-		apple: point{rand.Intn(20), rand.Intn(10)},
-	}
+	g := new(game)
+	g.h = 10
+	g.w = 20
+	g.snake = snake{[]point{{g.w / 2, g.h / 2}}}
+	g.apple = point{rand.Int() % g.w, rand.Int() % g.h}
 
 	for !g.over {
 		g.draw()
