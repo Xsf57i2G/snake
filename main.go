@@ -5,8 +5,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"math/rand"
 
 	"github.com/mattn/go-tty"
@@ -59,17 +57,11 @@ func (s *snake) move(x, y int) {
 }
 
 func (g *game) input() {
-	tty, err := tty.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer tty.Close()
+	tty, _ := tty.Open()
 
-	ch, err := tty.ReadRune()
-	if err != nil {
-		panic(err)
-	}
-	switch ch {
+	input, _ := tty.ReadRune()
+
+	switch input {
 	case 'w', 'k':
 		g.snake.move(0, -1)
 	case 'a', 'h':
@@ -81,6 +73,8 @@ func (g *game) input() {
 	case 'q':
 		g.over = true
 	}
+
+	tty.Close()
 }
 
 func (g *game) update() {
@@ -114,25 +108,25 @@ func (g *game) update() {
 
 func (g *game) draw() {
 	// Clear the console.
-	fmt.Print("\033[H\033[2J")
+	println("\033[H\033[2J")
 
 	// Print the score.
-	fmt.Printf("Score: %d\n", g.score)
+	println("Score:", g.score)
 
-	buf := bytes.Buffer{}
+	var buf = make([]byte, 0, g.h*(g.w+1))
 
 	for y := 0; y < g.h; y++ {
 		for x := 0; x < g.w; x++ {
 			switch {
 			case g.snake.body[0].same(point{x, y}):
-				buf.WriteByte('@')
+				buf = append(buf, '@')
 			case g.apple.same(point{x, y}):
-				buf.WriteByte('*')
+				buf = append(buf, '*')
 			default:
-				buf.WriteByte('.')
+				buf = append(buf, '.')
 			}
 		}
-		buf.WriteByte('\n')
+		buf = append(buf, '\n')
 	}
 
 	// For every point on the snake's body,
@@ -142,32 +136,37 @@ func (g *game) draw() {
 	// y coordinate by the width of the
 	// screen and adding the x coordinate.
 	for _, p := range g.snake.body[1:] {
-		i := p.y*(g.w+1) + p.x
-		buf.Bytes()[i] = 'o'
+		y := p.y
+		x := p.x
+		w := g.w
+		i := y*(w+1) + x
+		buf = append(buf[:i], append([]byte{'o'}, buf[i+1:]...)...)
 	}
 
-	fmt.Print(buf.String())
+	println(string(buf))
 
 	// Print game controls.
-	fmt.Println("wasd or hjkl to move, q to quit")
+	println("wasd or hjkl to move, q to quit")
 }
 
 func main() {
-	g := new(game)
-	g.h = 10
-	g.w = 20
-	g.snake = snake{[]point{{g.w / 2, g.h / 2}}}
-	g.apple = point{rand.Int() % g.w, rand.Int() % g.h}
+	game := new(game)
 
-	for !g.over {
-		g.draw()
-		g.input()
-		g.update()
-	}
+	game.h = 10
+	game.w = 20
+
+	game.snake = snake{[]point{{game.w / 2, game.h / 2}}}
+	game.apple = point{rand.Int() % game.w, rand.Int() % game.h}
+
+	for !game.over {
+		game.draw()
+		game.input()
+		game.update()
+	}	
 
 	// Show the cursor.
-	fmt.Print("\033[?25h")
+	println("\033[?25h")
 
 	// Print game over message and final score.
-	fmt.Printf("Game Over! Score: %d\n", g.score)
+	println("Game Over! Score:", game.score)
 }
