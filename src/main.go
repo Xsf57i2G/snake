@@ -108,7 +108,7 @@ func (g *game) update() {
 
 func (g *game) draw() {
 	// Clear the console.
-	println("\033[H\033[2J")
+	print("\033[H\033[2J")
 
 	// Print the score.
 	println("Score:", g.score)
@@ -165,8 +165,8 @@ func main() {
 	}
 
 	// Show the cursor.
-	println("\033[?25h")
+	print("\033[?25h")
 
 	// Print game over message and final score.
-	println("Game Over! Score:", game.score)
+	print("Game Over! Score:", game.score)
 }
