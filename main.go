@@ -140,7 +140,7 @@ func (g *game) draw() {
 		x := p.x
 		w := g.w
 		i := y*(w+1) + x
-		buf = append(buf[:i], append([]byte{'o'}, buf[i+1:]...)...)
+		buf[i] = 'o'
 	}
 
 	println(string(buf))
@@ -162,7 +162,7 @@ func main() {
 		game.draw()
 		game.input()
 		game.update()
-	}	
+	}
 
 	// Show the cursor.
 	println("\033[?25h")
